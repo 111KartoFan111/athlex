@@ -94,6 +94,25 @@ class AppTheme {
           ),
         ),
       ),
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: AppColors.surface,
+        filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.textSecondary.withValues(alpha: 255 * 0.3)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.textSecondary.withValues(alpha: 255 * 0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.neonGreen, width: 2),
+        ),
+        hintStyle: baseTextTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        labelStyle: baseTextTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/circular_progress_ring.dart';
@@ -20,67 +21,85 @@ class DashboardScreen extends ConsumerWidget {
             children: [
               // Header
               Text(
-                'Daily Dashboard',
-                style: theme.textTheme.headlineLarge,
+                'ATHLEX',
+                style: theme.textTheme.headlineLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
               ),
               const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.local_fire_department, color: AppColors.neonGreen, size: 18),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Streak 2  •  Rank Rookie',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.neonGreen,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              Text(
+                'Ready for GYM today?',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
               const SizedBox(height: 32),
 
-              // Progress Rings
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CircularProgressRing(
-                    progress: 0.65,
-                    label: 'Kcal',
-                    value: '450',
+              // Daily Dashboard Card
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.local_fire_department, color: AppColors.neonGreen, size: 24),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Streak 2  •  Rank Rookie',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CircularProgressRing(
+                            progress: 0.65,
+                            label: 'Kcal',
+                            value: '450',
+                          ),
+                          CircularProgressRing(
+                            progress: 0.4,
+                            label: 'Time',
+                            value: '25m',
+                          ),
+                          CircularProgressRing(
+                            progress: 0.8,
+                            label: 'Performance',
+                            value: '80%',
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () => context.push('/timer'),
+                              icon: const Icon(Icons.timer_outlined),
+                              label: const Text('Interval Timer'),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () => context.push('/ai-coach'),
+                              icon: const Icon(Icons.smart_toy_outlined),
+                              label: const Text('AI Coach'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  CircularProgressRing(
-                    progress: 0.4,
-                    label: 'Time',
-                    value: '25m',
-                  ),
-                  CircularProgressRing(
-                    progress: 0.8,
-                    label: 'Performance',
-                    value: '80%',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.timer_outlined),
-                      label: const Text('Interval Timer'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.smart_toy_outlined),
-                      label: const Text('AI Coach'),
-                    ),
-                  ),
-                ],
+                ),
               ),
               const SizedBox(height: 32),
 
@@ -107,7 +126,7 @@ class DashboardScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        '15 Min Fat Burner',
+                        '6 minutes: alternating burpees...',
                         style: theme.textTheme.titleMedium?.copyWith(fontSize: 18),
                       ),
                       const SizedBox(height: 4),
@@ -156,18 +175,18 @@ class DashboardScreen extends ConsumerWidget {
                             ),
                             child: const Icon(Icons.fitness_center, color: AppColors.neonGreen),
                           ),
-                          const Text('Gym • 45m', style: TextStyle(color: AppColors.textSecondary)),
+                          const Text('Gym', style: TextStyle(color: AppColors.textSecondary)),
                         ],
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Upper Body Power',
+                        'Neon Strength — Upper Body',
                         style: theme.textTheme.titleMedium?.copyWith(fontSize: 18),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Chest, Shoulders & Triceps focus',
-                        style: theme.textTheme.bodySmall,
+                        '32 min • 360 kcal • beginner',
+                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                       ),
                       const SizedBox(height: 16),
                       SizedBox(

@@ -21,64 +21,98 @@ class SportsScreen extends ConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sports Library'),
-      ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(16.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          mainAxisSpacing: 16,
-          crossAxisSpacing: 16,
-          childAspectRatio: 0.85,
-        ),
-        itemCount: sports.length,
-        itemBuilder: (context, index) {
-          final sport = sports[index];
-          final isPrimary = sport['isPrimary'] as bool;
-
-          return Card(
-            child: InkWell(
-              onTap: () {
-                // To View Workout Placeholder
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          sport['icon'] as IconData,
-                          size: 36,
-                          color: isPrimary ? AppColors.neonGreen : AppColors.textPrimary,
-                        ),
-                        TagWidget(
-                          text: isPrimary ? 'Primary' : 'Sport',
-                          isPrimary: isPrimary,
-                        ),
-                      ],
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                   Text(
+                    'Sports',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
                     ),
-                    const Spacer(),
-                    Text(
-                      sport['name'] as String,
-                      style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Multi-sport training library',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.textSecondary,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Tap to explore workouts',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          );
-        },
+            Expanded(
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+                itemCount: sports.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final sport = sports[index];
+                  final isPrimary = sport['isPrimary'] as bool;
+
+                  return Card(
+                    child: InkWell(
+                      onTap: () {
+                        // To View Workout Placeholder
+                      },
+                      borderRadius: BorderRadius.circular(16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.background,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isPrimary ? AppColors.neonGreen.withValues(alpha: 255 * 0.5) : AppColors.textSecondary.withValues(alpha: 255 * 0.3),
+                                ),
+                              ),
+                              child: Icon(
+                                sport['icon'] as IconData,
+                                size: 28,
+                                color: isPrimary ? AppColors.neonGreen : AppColors.textPrimary,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    sport['name'] as String,
+                                    style: theme.textTheme.titleMedium,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Tap to explore workouts',
+                                    style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            TagWidget(
+                              text: isPrimary ? 'Primary' : 'Sport',
+                              isPrimary: isPrimary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

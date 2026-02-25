@@ -1,0 +1,68 @@
+{
+  "@@locale": "ru",
+  "appTitle": "ATHLEX",
+
+  "loginTitle": "Войти",
+  "loginEmailHint": "Электронная почта",
+  "loginPasswordHint": "Пароль",
+  "loginForgotPassword": "Забыли пароль?",
+  "loginButton": "Войти",
+
+  "onboardingLevelTitle": "Выберите ваш уровень",
+  "onboardingLevelBeginner": "Новичок",
+  "onboardingLevelIntermediate": "Средний",
+  "onboardingLevelAdvanced": "Продвинутый",
+  "onboardingSportTitle": "Выберите основной спорт",
+  "onboardingNext": "Далее",
+
+  "navHome": "Главная",
+  "navSports": "Спорт",
+  "navProgress": "Прогресс",
+  "navProfile": "Настройки",
+
+  "dashboardTitle": "Ежедневная сводка",
+  "dashboardReady": "Готовы к тренировке сегодня?",
+  "dashboardStreak": "Серия {count} • Ранг {rank}",
+  "dashboardKcal": "Ккал",
+  "dashboardTime": "Время",
+  "dashboardPerformance": "Эффективность",
+  "dashboardIntervalTimer": "Таймер",
+  "dashboardAiCoach": "ИИ Тренер",
+  "dashboardDailyChallenge": "Избранное испытание",
+  "dashboardViewChallenge": "Смотреть вызов",
+  "dashboardRecommended": "Рекомендуем",
+  "dashboardOpenWorkout": "Начать",
+
+  "sportsLibraryTitle": "Спорт",
+  "sportsLibrarySubtitle": "Мультиспортивная библиотека",
+  "sportsTapExplore": "Нажмите для просмотра",
+  "sportsTagPrimary": "Основной",
+  "sportsTagSport": "Спорт",
+
+  "workoutSessionTitle": "Тренировка",
+  "workoutSessionSave": "Сохранить",
+  "workoutWatchVideo": "Смотреть видео",
+  "workoutSession": "Блоки",
+  "workoutLogCompleted": "Завершить",
+  "workoutOpenTimer": "Открыть таймер",
+
+  "timerTitle": "Таймер интервалов",
+  "timerNextUp": "След: {activity}",
+
+  "progressTitle": "Ваш прогресс",
+  "progressTotalWorkouts": "Всего тренировок",
+  "progressActiveHours": "Часы активности",
+  "progressKcalBurned": "Сожжено Ккал",
+  "progressActivityThisWeek": "Активность за неделю",
+  "progressHistory": "История",
+
+  "aiCoachTitle": "ИИ Тренер",
+  "aiCoachHint": "Спросите тренера...",
+  "aiCoachAcceptStart": "Принять и начать",
+
+  "settingsTitle": "Настройки",
+  "settingsLanguage": "Выбор языка",
+  "settingsCurrentLang": "Русский",
+  "settingsTheme": "Тема приложения",
+  "settingsLogout": "Выйти"
+}

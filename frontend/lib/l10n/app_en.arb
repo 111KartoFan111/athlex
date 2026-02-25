@@ -1,0 +1,79 @@
+{
+  "@@locale": "en",
+  "appTitle": "ATHLEX",
+  
+  "loginTitle": "Log In",
+  "loginEmailHint": "Email",
+  "loginPasswordHint": "Password",
+  "loginForgotPassword": "Forgot password?",
+  "loginButton": "Log In",
+  
+  "onboardingLevelTitle": "Select your level",
+  "onboardingLevelBeginner": "Beginner",
+  "onboardingLevelIntermediate": "Intermediate",
+  "onboardingLevelAdvanced": "Advanced",
+  "onboardingSportTitle": "Choose your primary sport",
+  "onboardingNext": "Next",
+  
+  "navHome": "Home",
+  "navSports": "Sports",
+  "navProgress": "Progress",
+  "navProfile": "Settings",
+  
+  "dashboardTitle": "Daily Dashboard",
+  "dashboardReady": "Ready for GYM today?",
+  "dashboardStreak": "Streak {count} • Rank {rank}",
+  "@dashboardStreak": {
+    "placeholders": {
+      "count": { "type": "int" },
+      "rank": { "type": "String" }
+    }
+  },
+  "dashboardKcal": "Kcal",
+  "dashboardTime": "Time",
+  "dashboardPerformance": "Performance",
+  "dashboardIntervalTimer": "Interval Timer",
+  "dashboardAiCoach": "AI Coach",
+  "dashboardDailyChallenge": "Daily Challenge",
+  "dashboardViewChallenge": "View Challenge",
+  "dashboardRecommended": "Recommended",
+  "dashboardOpenWorkout": "Open Workout",
+  
+  "sportsLibraryTitle": "Sports",
+  "sportsLibrarySubtitle": "Multi-sport training library",
+  "sportsTapExplore": "Tap to explore workouts",
+  "sportsTagPrimary": "Primary",
+  "sportsTagSport": "Sport",
+  
+  "workoutSessionTitle": "Workout",
+  "workoutSessionSave": "Save",
+  "workoutWatchVideo": "Watch Video",
+  "workoutSession": "Session",
+  "workoutLogCompleted": "Log completed",
+  "workoutOpenTimer": "Open timer",
+  
+  "timerTitle": "Interval Timer",
+  "timerNextUp": "Next: {activity}",
+  "@timerNextUp": {
+    "placeholders": {
+      "activity": { "type": "String" }
+    }
+  },
+  
+  "progressTitle": "Your Progress",
+  "progressTotalWorkouts": "Total Workouts",
+  "progressActiveHours": "Active Hours",
+  "progressKcalBurned": "Kcal Burned",
+  "progressActivityThisWeek": "Activity This Week",
+  "progressHistory": "History",
+  
+  "aiCoachTitle": "AI Coach",
+  "aiCoachHint": "Ask your coach...",
+  "aiCoachAcceptStart": "Accept & Start",
+  
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language Selection",
+  "settingsCurrentLang": "English",
+  "settingsTheme": "App Theme",
+  "settingsLogout": "Log Out"
+}
