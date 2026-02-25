@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="02-create-users" author="athlex">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password_hash" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="level" type="VARCHAR(50)"/>
+            <column name="primary_sport_id" type="BIGINT"/>
+            <column name="goal" type="VARCHAR(255)"/>
+            <column name="current_streak" type="INT" defaultValue="0"/>
+            <column name="rank_title" type="VARCHAR(100)"/>
+        </createTable>
+        
+        <addForeignKeyConstraint baseTableName="users" baseColumnNames="primary_sport_id"
+                                 constraintName="fk_users_primary_sport"
+                                 referencedTableName="sports" referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>
