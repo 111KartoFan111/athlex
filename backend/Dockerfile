@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-alpine AS builder
+FROM eclipse-temurin:17-jdk-jammy AS builder
 WORKDIR /app
 
 # Copy maven executable to the image
@@ -21,7 +21,7 @@ COPY src src
 RUN ./mvnw package -DskipTests
 
 # Final stage
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
