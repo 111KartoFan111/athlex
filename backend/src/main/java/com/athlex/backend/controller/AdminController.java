@@ -47,8 +47,12 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getUserStats(id));
     }
 
-    @GetMapping("/analytics/users/active")
-    public ResponseEntity<Map<String, Long>> getActiveUsersCount() {
-        return ResponseEntity.ok(Map.of("activeUsers", adminService.getActiveUsersCount()));
+    @GetMapping("/analytics/dashboard")
+    public ResponseEntity<Map<String, Object>> getDashboardAnalytics() {
+        return ResponseEntity.ok(Map.of(
+            "totalUsers", adminService.getTotalUsersCount(),
+            "activeUsers", adminService.getActiveUsersCount(),
+            "completedWorkouts", adminService.getCompletedWorkoutsCount()
+        ));
     }
 }

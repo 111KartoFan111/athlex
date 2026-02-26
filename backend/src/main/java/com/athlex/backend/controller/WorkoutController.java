@@ -19,7 +19,12 @@ public class WorkoutController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Workout>> getAllWorkouts(@RequestParam(required = false) Level level) {
+    public ResponseEntity<List<Workout>> getAllWorkouts(
+            @RequestParam(required = false) Level level,
+            @RequestParam(required = false) Long sportId) {
+        if (sportId != null) {
+            return ResponseEntity.ok(workoutService.getWorkoutsBySport(sportId));
+        }
         if (level != null) {
             return ResponseEntity.ok(workoutService.getWorkoutsByLevel(level));
         }

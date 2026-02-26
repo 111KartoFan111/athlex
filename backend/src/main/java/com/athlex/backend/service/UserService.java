@@ -1,6 +1,7 @@
 package com.athlex.backend.service;
 
 import com.athlex.backend.dto.user.DashboardStatsResponse;
+import com.athlex.backend.dto.user.UserProfileResponse;
 import com.athlex.backend.dto.user.UserProfileSetupRequest;
 import com.athlex.backend.entity.Sport;
 import com.athlex.backend.entity.User;
@@ -57,6 +58,24 @@ public class UserService {
                 user.getRankTitle(),
                 totalCalories,
                 totalDuration
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                
+        return new UserProfileResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole(),
+                user.getLevel(),
+                user.getPrimarySport(),
+                user.getGoal(),
+                user.getCurrentStreak(),
+                user.getRankTitle(),
+                user.getBlocked()
         );
     }
 }

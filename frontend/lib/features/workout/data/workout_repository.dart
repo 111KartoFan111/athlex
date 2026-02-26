@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+цimport 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/models/workout_model.dart';
@@ -13,6 +13,16 @@ class WorkoutRepository {
 
   WorkoutRepository(this._dio);
 
+  Future<List<Map<String, dynamic>>> getAllWorkouts() async {
+    try {
+      final response = await _dio.get('/workouts');
+      final List<dynamic> data = response.data;
+      return data.cast<Map<String, dynamic>>();
+    } catch (e) {
+      throw Exception('Failed to fetch workouts: $e');
+    }
+  }
+
   Future<List<WorkoutModel>> getWorkouts({String? level}) async {
     try {
       final queryParams = level != null ? {'level': level.toUpperCase()} : null;
@@ -21,6 +31,16 @@ class WorkoutRepository {
       return data.map((json) => WorkoutModel.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to fetch workouts: $e');
+    }
+  }
+
+  Future<List<WorkoutModel>> getWorkoutsBySport(int sportId) async {
+    try {
+      final response = await _dio.get('/workouts', queryParameters: {'sportId': sportId});
+      final List<dynamic> data = response.data;
+      return data.map((json) => WorkoutModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to fetch workouts for sport: $e');
     }
   }
 

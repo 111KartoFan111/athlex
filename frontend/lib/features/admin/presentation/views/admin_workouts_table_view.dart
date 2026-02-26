@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../auth/domain/models/user_model.dart';
-import '../providers/admin_users_provider.dart';
+import '../../../workout/domain/models/workout_model.dart';
+import '../providers/admin_workouts_provider.dart';
+import '../widgets/create_workout_modal.dart';
 
-class AdminDataTablesView extends ConsumerWidget {
+class AdminWorkoutsTableView extends ConsumerWidget {
   final String title;
-  const AdminDataTablesView({super.key, required this.title});
+  const AdminWorkoutsTableView({super.key, required this.title});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final usersAsync = ref.watch(adminUsersProvider);
-    final actionState = ref.watch(adminUserActionProvider);
+    final workoutsAsync = ref.watch(adminWorkoutsProvider);
+    final actionState = ref.watch(adminWorkoutActionProvider);
 
     // Listen for action errors
-    ref.listen(adminUserActionProvider, (previous, next) {
+    ref.listen(adminWorkoutActionProvider, (previous, next) {
       if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Action failed: ${next.error}')),
@@ -92,59 +93,52 @@ class AdminDataTablesView extends ConsumerWidget {
                         dividerThickness: 1,
                       ),
                     ),
-                    child: usersAsync.when(
+                    child: workoutsAsync.when(
                       loading: () => const Center(child: CircularProgressIndicator(color: AppColors.neonGreen)),
-                      error: (err, stack) => Center(child: Text('Error loading users: $err', style: const TextStyle(color: Colors.redAccent))),
-                      data: (users) {
+                      error: (err, stack) => Center(child: Text('Error loading workouts: $err', style: const TextStyle(color: Colors.redAccent))),
+                      data: (workouts) {
                         return DataTable(
                           columns: const [
                             DataColumn(label: Text('ID')),
-                            DataColumn(label: Text('Email')),
-                            DataColumn(label: Text('Role')),
+                            DataColumn(label: Text('Sport')),
+                            DataColumn(label: Text('Title')),
+                            DataColumn(label: Text('Duration (min)')),
                             DataColumn(label: Text('Level')),
-                            DataColumn(label: Text('Primary Sport')),
-                            DataColumn(label: Text('Status')),
+                            DataColumn(label: Text('AI Generated')),
                             DataColumn(label: Text('Actions')),
                           ],
-                          rows: users.map((user) => DataRow(
+                          rows: workouts.map((workout) => DataRow(
                             cells: [
-                              DataCell(Text(user.id.toString(), style: const TextStyle(color: AppColors.textPrimary))),
-                              DataCell(Text(user.email)),
-                              DataCell(Text(user.role)),
-                              DataCell(Text(user.level ?? '-')),
-                              DataCell(Text(user.primarySport?.name ?? '-')),
-                              DataCell(_buildStatusBadge(user.isBlocked ? 'Banned' : 'Active')),
+                              DataCell(Text(workout.id.toString(), style: const TextStyle(color: AppColors.textPrimary))),
+                              DataCell(Text(workout.sport.name)),
+                              DataCell(Text(workout.title)),
+                              DataCell(Text(workout.durationMin.toString())),
+                              DataCell(Text(workout.level ?? '-')),
+                              DataCell(Text(workout.isAiGenerated ? 'Yes' : 'No')),
                               DataCell(
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     OutlinedButton(
-                                      onPressed: actionState.isLoading ? null : () {
-                                        final newRole = user.role == 'ROLE_ADMIN' ? 'ROLE_USER' : 'ROLE_ADMIN';
-                                        ref.read(adminUserActionProvider.notifier).updateRole(user.id, newRole);
-                                      },
+                                      onPressed: () {}, // Edit is currently a placeholder
                                       style: OutlinedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(horizontal: 16),
                                         side: const BorderSide(color: AppColors.neonGreen),
                                         foregroundColor: AppColors.neonGreen,
                                       ),
-                                      child: Text(user.role == 'ROLE_ADMIN' ? 'Revoke Admin' : 'Make Admin'),
+                                      child: const Text('Edit'),
                                     ),
                                     const SizedBox(width: 8),
                                     OutlinedButton(
                                       onPressed: actionState.isLoading ? null : () {
-                                        if (user.isBlocked) {
-                                          ref.read(adminUserActionProvider.notifier).unblockUser(user.id);
-                                        } else {
-                                          ref.read(adminUserActionProvider.notifier).blockUser(user.id);
-                                        }
+                                        ref.read(adminWorkoutActionProvider.notifier).deleteWorkout(workout.id);
                                       },
                                       style: OutlinedButton.styleFrom(
                                         padding: const EdgeInsets.symmetric(horizontal: 16),
                                         side: const BorderSide(color: Colors.redAccent),
                                         foregroundColor: Colors.redAccent,
                                       ),
-                                      child: Text(user.isBlocked ? 'Unblock' : 'Block'),
+                                      child: const Text('Delete'),
                                     ),
                                   ],
                                 ),
@@ -189,54 +183,7 @@ class AdminDataTablesView extends ConsumerWidget {
   void _showCreateModal(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
-        // Mock Form Fields (Title, Duration, Calories, Equipment)
-        return AlertDialog(
-          backgroundColor: AppColors.background,
-          surfaceTintColor: Colors.transparent,
-          title: const Text('Create New Workout'),
-          content: SizedBox(
-            width: 400,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildModalTextField('Title'),
-                const SizedBox(height: 16),
-                _buildModalTextField('Duration (mins)'),
-                const SizedBox(height: 16),
-                _buildModalTextField('Calories'),
-                const SizedBox(height: 16),
-                _buildModalTextField('Equipment'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.neonGreen,
-                foregroundColor: AppColors.background,
-              ),
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildModalTextField(String label) {
-    return TextField(
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: AppColors.surface, // Dark grey inputs
-      ),
+      builder: (context) => const CreateWorkoutModal(),
     );
   }
 }

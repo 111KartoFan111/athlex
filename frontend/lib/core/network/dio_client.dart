@@ -16,7 +16,7 @@ final dioProvider = Provider<Dio>((ref) {
   final currentLocale = ref.watch(localeProvider);
   final router = ref.watch(routerProvider);
   
-  // Use appropriate localhost for emulator/simulator
+  // Use appropriate localhost for web/emulator/simulator
   String baseUrl = 'http://localhost:8080/api/v1';
   if (!kIsWeb) {
     baseUrl = Platform.isAndroid ? 'http://10.0.2.2:8080/api/v1' : 'http://localhost:8080/api/v1';

@@ -1,6 +1,7 @@
 package com.athlex.backend.controller;
 
 import com.athlex.backend.dto.user.DashboardStatsResponse;
+import com.athlex.backend.dto.user.UserProfileResponse;
 import com.athlex.backend.dto.user.UserProfileSetupRequest;
 import com.athlex.backend.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -28,5 +29,11 @@ public class UserController {
     public ResponseEntity<DashboardStatsResponse> getDashboard(Authentication authentication) {
         String email = authentication.getName();
         return ResponseEntity.ok(userService.getDashboardStats(email));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getCurrentUser(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(userService.getCurrentUser(email));
     }
 }

@@ -5,21 +5,23 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import 'providers/auth_provider.dart';
 
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends ConsumerStatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -31,36 +33,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     ref.listen(authStateProvider, (previous, next) {
       if (next is AsyncData && next.value != null) {
-        // Successful login, navigate to onboarding
+        // Successful registration, navigate to onboarding
         context.go('/onboarding');
       } else if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${next.error}')),
+          SnackBar(content: Text('Registration failed: ${next.error}')),
         );
       }
     });
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: () => context.pop(),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Logo Placeholder
-              const SizedBox(height: 48),
+              const SizedBox(height: 16),
               Icon(
-                Icons.fitness_center,
+                Icons.person_add_outlined,
                 size: 80,
                 color: AppColors.neonGreen,
               ),
               const SizedBox(height: 16),
               Text(
-                l10n.appTitle,
+                'Create Account',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.displaySmall?.copyWith(
+                style: theme.textTheme.headlineLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Join ATHLEX today',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 48),
@@ -85,34 +103,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
                 ),
               ),
-              const SizedBox(height: 12),
-
-              // Forgot Password
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.textSecondary,
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(l10n.loginForgotPassword),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                style: const TextStyle(color: AppColors.textPrimary),
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
                 ),
               ),
               const SizedBox(height: 48),
 
-              // Login Button
+              // Register Button
               ElevatedButton(
                 onPressed: authState.isLoading
                     ? null
                     : () {
                         final email = _emailController.text;
                         final password = _passwordController.text;
-                        if (email.isNotEmpty && password.isNotEmpty) {
-                          ref.read(authStateProvider.notifier).login(email, password);
+                        final confirmPassword = _confirmPasswordController.text;
+                        
+                        if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Please fill all fields.')),
+                          );
+                          return;
                         }
+                        
+                        if (password != confirmPassword) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Passwords do not match.')),
+                          );
+                          return;
+                        }
+                        
+                        ref.read(authStateProvider.notifier).register(email, password);
                       },
                 child: authState.isLoading 
                     ? const SizedBox(
@@ -120,22 +146,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         width: 20, 
                         child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background)
                       )
-                    : Text(l10n.loginButton),
+                    : const Text('Sign Up'),
               ),
               const SizedBox(height: 24),
 
-              // Sign Up
+              // Log In
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account?",
+                    "Already have an account?",
                     style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
                   ),
                   TextButton(
-                    onPressed: authState.isLoading ? null : () => context.push('/register'),
+                    onPressed: () => context.pop(),
                     style: TextButton.styleFrom(foregroundColor: AppColors.neonGreen),
-                    child: const Text('Sign up'),
+                    child: const Text('Log In'),
                   ),
                 ],
               ),

@@ -24,5 +24,8 @@ public interface WorkoutRepository extends JpaRepository<Workout, Long> {
     List<Workout> findAll();
     
     @EntityGraph(attributePaths = {"sport"})
+    List<Workout> findBySportId(Long sportId);
+
+    @EntityGraph(attributePaths = {"sport"})
     List<Workout> findByEquipmentNeededContainingIgnoreCase(String equipment);
 }

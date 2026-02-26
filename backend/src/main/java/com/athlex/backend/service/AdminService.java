@@ -36,7 +36,18 @@ public class AdminService {
 
     @Transactional(readOnly = true)
     public long getActiveUsersCount() {
+        // For simplicity, considering all non-blocked users as active
+        return userRepository.count() - userRepository.findAll().stream().filter(u -> Boolean.TRUE.equals(u.getBlocked())).count();
+    }
+
+    @Transactional(readOnly = true)
+    public long getTotalUsersCount() {
         return userRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public long getCompletedWorkoutsCount() {
+        return workoutLogRepository.count();
     }
 
     @Transactional(readOnly = true)

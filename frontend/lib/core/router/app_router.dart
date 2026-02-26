@@ -6,7 +6,9 @@ import '../../features/navigation/presentation/main_navigation_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/sports/presentation/sports_screen.dart';
 import '../../features/workout/presentation/workout_session_screen.dart';
+import '../../features/workout/presentation/workouts_by_sport_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/progress/presentation/progress_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -21,6 +23,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: '/onboarding',
@@ -70,6 +76,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final workoutId = state.pathParameters['id'] ?? '';
           return WorkoutSessionScreen(workoutId: workoutId);
+        },
+      ),
+      GoRoute(
+        path: '/workouts/sport/:sportId',
+        builder: (context, state) {
+          final sportId = int.tryParse(state.pathParameters['sportId'] ?? '') ?? 0;
+          final sportName = state.uri.queryParameters['name'] ?? 'Workouts';
+          return WorkoutsBySportScreen(sportId: sportId, sportName: sportName);
         },
       ),
       GoRoute(

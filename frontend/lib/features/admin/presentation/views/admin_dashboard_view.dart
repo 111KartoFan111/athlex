@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../providers/admin_dashboard_provider.dart';
 
-class AdminDashboardView extends StatelessWidget {
+class AdminDashboardView extends ConsumerWidget {
   const AdminDashboardView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dashboardAsync = ref.watch(adminDashboardProvider);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -23,16 +27,20 @@ class AdminDashboardView extends StatelessWidget {
           const SizedBox(height: 32),
           
           // Summary Widgets
-          Row(
-            children: [
-              _buildSummaryCard('Total Users', '12,450', '+12% this week', true),
-              const SizedBox(width: 24),
-              _buildSummaryCard('Active Subscriptions', '3,842', '+5% this week', true),
-              const SizedBox(width: 24),
-              _buildSummaryCard('Workouts Completed', '84,192', '+18% this week', true),
-              const SizedBox(width: 24),
-              _buildSummaryCard('Server Load', '42%', '-2% today', false),
-            ],
+          dashboardAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator(color: AppColors.neonGreen)),
+            error: (err, stack) => Text('Error loading dashboard: $err', style: const TextStyle(color: Colors.redAccent)),
+            data: (stats) => Row(
+              children: [
+                _buildSummaryCard('Total Users', '${stats['totalUsers'] ?? 0}', '+12% this week', true),
+                const SizedBox(width: 24),
+                _buildSummaryCard('Active Users', '${stats['activeUsers'] ?? 0}', '+5% this week', true),
+                const SizedBox(width: 24),
+                _buildSummaryCard('Workouts Completed', '${stats['completedWorkouts'] ?? 0}', '+18% this week', true),
+                const SizedBox(width: 24),
+                _buildSummaryCard('Server Load', '42%', '-2% today', false),
+              ],
+            ),
           ),
           const SizedBox(height: 48),
 

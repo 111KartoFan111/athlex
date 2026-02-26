@@ -11,5 +11,6 @@
     <include file="db/changelog/04-create-exercises.xml"/>
     <include file="db/changelog/05-create-workout-logs.xml"/>
     <include file="db/changelog/06-create-challenges.xml"/>
+    <include file="db/changelog/07-add-blocked-to-users.xml"/>
 
 </databaseChangeLog>

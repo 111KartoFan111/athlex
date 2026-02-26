@@ -18,6 +18,7 @@ _$UserModelImpl _$$UserModelImplFromJson(Map<String, dynamic> json) =>
       goal: json['goal'] as String?,
       currentStreak: (json['currentStreak'] as num?)?.toInt() ?? 0,
       rankTitle: json['rankTitle'] as String?,
+      isBlocked: json['isBlocked'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
@@ -30,4 +31,5 @@ Map<String, dynamic> _$$UserModelImplToJson(_$UserModelImpl instance) =>
       'goal': instance.goal,
       'currentStreak': instance.currentStreak,
       'rankTitle': instance.rankTitle,
+      'isBlocked': instance.isBlocked,
     };

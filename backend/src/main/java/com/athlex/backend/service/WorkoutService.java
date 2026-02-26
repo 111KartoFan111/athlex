@@ -39,6 +39,11 @@ public class WorkoutService {
     public List<Workout> getAllWorkouts() {
         return workoutRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public List<Workout> getWorkoutsBySport(Long sportId) {
+        return workoutRepository.findBySportId(sportId);
+    }
     
     @Transactional(readOnly = true)
     public Workout getWorkoutById(Long id) {

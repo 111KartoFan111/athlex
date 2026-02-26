@@ -5,10 +5,27 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/circular_progress_ring.dart';
 import '../../../core/widgets/tag_widget.dart';
 import '../../profile/data/user_repository.dart';
+import '../../workout/data/workout_repository.dart';
 
 final dashboardStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   final repository = ref.watch(userRepositoryProvider);
   return repository.getDashboardStats();
+});
+
+/// Fetches the first available workout to use as the daily recommendation
+final recommendedWorkoutProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final repo = ref.watch(workoutRepositoryProvider);
+  final workouts = await repo.getAllWorkouts();
+  if (workouts.isEmpty) return null;
+  // Prefer a beginner-level workout if available
+  try {
+    return workouts.firstWhere(
+      (w) => (w['level'] as String?)?.toLowerCase() == 'beginner',
+      orElse: () => workouts.first,
+    );
+  } catch (_) {
+    return workouts.first;
+  }
 });
 
 class DashboardScreen extends ConsumerWidget {
@@ -17,6 +34,8 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+
+    final recommendedWorkout = ref.watch(recommendedWorkoutProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -181,47 +200,64 @@ class DashboardScreen extends ConsumerWidget {
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.fitness_center, color: AppColors.neonGreen),
-                          ),
-                          const Text('Gym', style: TextStyle(color: AppColors.textSecondary)),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Neon Strength — Upper Body',
-                        style: theme.textTheme.titleMedium?.copyWith(fontSize: 18),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '32 min • 360 kcal • beginner',
-                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Open Workout'),
-                        ),
-                      ),
-                    ],
+              recommendedWorkout.when(
+                loading: () => const Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator(color: AppColors.neonGreen)),
                   ),
                 ),
+                error: (e, _) => const SizedBox.shrink(),
+                data: (workout) {
+                  if (workout == null) return const SizedBox.shrink();
+                  final id = workout['id']?.toString() ?? '';
+                  final title = workout['title'] ?? 'Workout';
+                  final duration = workout['durationMin'] ?? workout['duration_min'] ?? 0;
+                  final calories = workout['calories'] ?? 0;
+                  final level = (workout['level'] as String? ?? 'Beginner').toLowerCase();
+                  return Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.fitness_center, color: AppColors.neonGreen),
+                              ),
+                              Text(level, style: const TextStyle(color: AppColors.textSecondary)),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            title,
+                            style: theme.textTheme.titleMedium?.copyWith(fontSize: 18),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$duration min • $calories kcal • $level',
+                            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: id.isNotEmpty ? () => context.push('/workout/$id') : null,
+                              child: const Text('Open Workout'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 32),
                 ],

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import 'views/admin_dashboard_view.dart';
 import 'views/admin_data_tables_view.dart';
+import 'views/admin_workouts_table_view.dart';
+import 'views/admin_exercises_table_view.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -16,8 +18,8 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
   final List<Widget> _views = [
     const AdminDashboardView(),
     const AdminDataTablesView(title: 'Users'),
-    const AdminDataTablesView(title: 'Workouts'),
-    const Center(child: Text('Exercises (Placeholder)')),
+    const AdminWorkoutsTableView(title: 'Workouts'),
+    const AdminExercisesTableView(title: 'Exercises'),
     const Center(child: Text('Challenges (Placeholder)')),
     const Center(child: Text('Settings (Placeholder)')),
   ];

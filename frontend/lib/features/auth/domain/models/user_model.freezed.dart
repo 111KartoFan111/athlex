@@ -29,6 +29,7 @@ mixin _$UserModel {
   String? get goal => throw _privateConstructorUsedError;
   int get currentStreak => throw _privateConstructorUsedError;
   String? get rankTitle => throw _privateConstructorUsedError;
+  bool get isBlocked => throw _privateConstructorUsedError;
 
   /// Serializes this UserModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,6 +55,7 @@ abstract class $UserModelCopyWith<$Res> {
     String? goal,
     int currentStreak,
     String? rankTitle,
+    bool isBlocked,
   });
 
   $SportModelCopyWith<$Res>? get primarySport;
@@ -82,6 +84,7 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
     Object? goal = freezed,
     Object? currentStreak = null,
     Object? rankTitle = freezed,
+    Object? isBlocked = null,
   }) {
     return _then(
       _value.copyWith(
@@ -117,6 +120,10 @@ class _$UserModelCopyWithImpl<$Res, $Val extends UserModel>
                 ? _value.rankTitle
                 : rankTitle // ignore: cast_nullable_to_non_nullable
                       as String?,
+            isBlocked: null == isBlocked
+                ? _value.isBlocked
+                : isBlocked // ignore: cast_nullable_to_non_nullable
+                      as bool,
           )
           as $Val,
     );
@@ -155,6 +162,7 @@ abstract class _$$UserModelImplCopyWith<$Res>
     String? goal,
     int currentStreak,
     String? rankTitle,
+    bool isBlocked,
   });
 
   @override
@@ -183,6 +191,7 @@ class __$$UserModelImplCopyWithImpl<$Res>
     Object? goal = freezed,
     Object? currentStreak = null,
     Object? rankTitle = freezed,
+    Object? isBlocked = null,
   }) {
     return _then(
       _$UserModelImpl(
@@ -218,6 +227,10 @@ class __$$UserModelImplCopyWithImpl<$Res>
             ? _value.rankTitle
             : rankTitle // ignore: cast_nullable_to_non_nullable
                   as String?,
+        isBlocked: null == isBlocked
+            ? _value.isBlocked
+            : isBlocked // ignore: cast_nullable_to_non_nullable
+                  as bool,
       ),
     );
   }
@@ -235,6 +248,7 @@ class _$UserModelImpl implements _UserModel {
     this.goal,
     this.currentStreak = 0,
     this.rankTitle,
+    this.isBlocked = false,
   });
 
   factory _$UserModelImpl.fromJson(Map<String, dynamic> json) =>
@@ -257,10 +271,13 @@ class _$UserModelImpl implements _UserModel {
   final int currentStreak;
   @override
   final String? rankTitle;
+  @override
+  @JsonKey()
+  final bool isBlocked;
 
   @override
   String toString() {
-    return 'UserModel(id: $id, email: $email, role: $role, level: $level, primarySport: $primarySport, goal: $goal, currentStreak: $currentStreak, rankTitle: $rankTitle)';
+    return 'UserModel(id: $id, email: $email, role: $role, level: $level, primarySport: $primarySport, goal: $goal, currentStreak: $currentStreak, rankTitle: $rankTitle, isBlocked: $isBlocked)';
   }
 
   @override
@@ -278,7 +295,9 @@ class _$UserModelImpl implements _UserModel {
             (identical(other.currentStreak, currentStreak) ||
                 other.currentStreak == currentStreak) &&
             (identical(other.rankTitle, rankTitle) ||
-                other.rankTitle == rankTitle));
+                other.rankTitle == rankTitle) &&
+            (identical(other.isBlocked, isBlocked) ||
+                other.isBlocked == isBlocked));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -293,6 +312,7 @@ class _$UserModelImpl implements _UserModel {
     goal,
     currentStreak,
     rankTitle,
+    isBlocked,
   );
 
   /// Create a copy of UserModel
@@ -319,6 +339,7 @@ abstract class _UserModel implements UserModel {
     final String? goal,
     final int currentStreak,
     final String? rankTitle,
+    final bool isBlocked,
   }) = _$UserModelImpl;
 
   factory _UserModel.fromJson(Map<String, dynamic> json) =
@@ -340,6 +361,8 @@ abstract class _UserModel implements UserModel {
   int get currentStreak;
   @override
   String? get rankTitle;
+  @override
+  bool get isBlocked;
 
   /// Create a copy of UserModel
   /// with the given fields replaced by the non-null parameter values.

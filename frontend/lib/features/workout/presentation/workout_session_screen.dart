@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../progress/data/progress_repository.dart';
 import '../data/workout_repository.dart';
@@ -22,7 +23,7 @@ class WorkoutSessionScreen extends ConsumerWidget {
         title: const Text('Workout'),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: () => context.pop(),
             style: TextButton.styleFrom(foregroundColor: AppColors.neonGreen),
             child: const Text('Save'),
           ),
@@ -158,7 +159,7 @@ class WorkoutSessionScreen extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () => context.push('/timer'),
                   style: TextButton.styleFrom(foregroundColor: AppColors.textSecondary),
                   child: const Text('Open timer'),
                 ),

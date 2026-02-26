@@ -28,7 +28,7 @@ class AuthRepository {
         await _storage.write(key: 'jwt_token', value: token);
       }
       
-      return UserModel.fromJson(response.data['user']);
+      return await getCurrentUser();
     } catch (e) {
       throw Exception('Failed to login: $e');
     }
@@ -43,7 +43,7 @@ class AuthRepository {
         await _storage.write(key: 'jwt_token', value: token);
       }
       
-      return UserModel.fromJson(response.data['user']);
+      return await getCurrentUser();
     } catch (e) {
       throw Exception('Failed to register: $e');
     }

@@ -15,6 +15,7 @@ class UserModel with _$UserModel {
     String? goal,
     @Default(0) int currentStreak,
     String? rankTitle,
+    @Default(false) bool isBlocked,
   }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
