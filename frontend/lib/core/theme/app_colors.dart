@@ -17,4 +17,7 @@ class AppColors {
 
   /// Light Grey (#8E8E93) for subtitles, secondary text, inactive tab icons.
   static const Color textSecondary = Color(0xFF8E8E93);
+
+  /// Error Red (#FF453A) for destructive actions or failure states.
+  static const Color error = Color(0xFFFF453A);
 }

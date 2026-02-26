@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../../core/theme/app_colors.dart';
+import 'providers/auth_provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -25,6 +27,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+    final authState = ref.watch(authStateProvider);
+
+    ref.listen(authStateProvider, (previous, next) {
+      if (next is AsyncData && next.value != null) {
+        // Successful login, navigate to onboarding
+        context.go('/onboarding');
+      } else if (next is AsyncError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login failed: ${next.error}')),
+        );
+      }
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -91,11 +105,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Login Button
               ElevatedButton(
-                onPressed: () {
-                  // Navigate to onboarding as part of the flow for demonstration
-                  context.go('/onboarding');
-                },
-                child: Text(l10n.loginButton),
+                onPressed: authState.isLoading
+                    ? null
+                    : () {
+                        final email = _emailController.text;
+                        final password = _passwordController.text;
+                        if (email.isNotEmpty && password.isNotEmpty) {
+                          ref.read(authStateProvider.notifier).login(email, password);
+                        }
+                      },
+                child: authState.isLoading 
+                    ? const SizedBox(
+                        height: 20, 
+                        width: 20, 
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background)
+                      )
+                    : Text(l10n.loginButton),
               ),
               const SizedBox(height: 24),
 
@@ -108,7 +133,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: authState.isLoading
+                        ? null
+                        : () {
+                            final email = _emailController.text;
+                            final password = _passwordController.text;
+                            if (email.isNotEmpty && password.isNotEmpty) {
+                              ref.read(authStateProvider.notifier).register(email, password);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Please fill all fields to register.')),
+                              );
+                            }
+                          },
                     style: TextButton.styleFrom(foregroundColor: AppColors.neonGreen),
                     child: const Text('Sign up'),
                   ),

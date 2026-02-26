@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import com.athlex.backend.entity.WorkoutLog;
+
 @RestController
 @RequestMapping("/api/v1/progress")
 public class ProgressController {
@@ -34,5 +37,13 @@ public class ProgressController {
                 request.performanceScore()
         );
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<WorkoutLog>> getWorkoutHistory(Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return ResponseEntity.ok(workoutService.getWorkoutHistory(user.getId()));
     }
 }

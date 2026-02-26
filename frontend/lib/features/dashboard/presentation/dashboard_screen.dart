@@ -4,6 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/circular_progress_ring.dart';
 import '../../../core/widgets/tag_widget.dart';
+import '../../profile/data/user_repository.dart';
+
+final dashboardStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final repository = ref.watch(userRepositoryProvider);
+  return repository.getDashboardStats();
+});
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -14,27 +20,44 @@ class DashboardScreen extends ConsumerWidget {
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Text(
-                'ATHLEX',
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Ready for GYM today?',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 32),
+        child: ref.watch(dashboardStatsProvider).when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.neonGreen),
+          ),
+          error: (error, stack) => Center(
+            child: Text('Failed to load dashboard: $error', style: const TextStyle(color: AppColors.error)),
+          ),
+          data: (stats) {
+            final streak = stats['currentStreak'] ?? 0;
+            final rank = stats['rankTitle'] ?? 'Beginner';
+            final calories = stats['totalCaloriesBurned'] ?? 0;
+            final duration = stats['totalDurationMin'] ?? 0;
+
+            // Calculate simplistic percentages based on mock daily goals
+            final calProgress = (calories / 600).clamp(0.0, 1.0);
+            final timeProgress = (duration / 45).clamp(0.0, 1.0);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Text(
+                    'ATHLEX',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ready to crush it today?',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
 
               // Daily Dashboard Card
               Card(
@@ -48,7 +71,7 @@ class DashboardScreen extends ConsumerWidget {
                           const Icon(Icons.local_fire_department, color: AppColors.neonGreen, size: 24),
                           const SizedBox(width: 8),
                           Text(
-                            'Streak 2  •  Rank Rookie',
+                            'Streak $streak  •  Rank $rank',
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.bold,
@@ -57,20 +80,20 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 32),
-                      const Row(
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           CircularProgressRing(
-                            progress: 0.65,
+                            progress: calProgress.toDouble(),
                             label: 'Kcal',
-                            value: '450',
+                            value: calories.toString(),
                           ),
                           CircularProgressRing(
-                            progress: 0.4,
+                            progress: timeProgress.toDouble(),
                             label: 'Time',
-                            value: '25m',
+                            value: '${duration}m',
                           ),
-                          CircularProgressRing(
+                          const CircularProgressRing(
                             progress: 0.8,
                             label: 'Performance',
                             value: '80%',
@@ -201,8 +224,10 @@ class DashboardScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 32),
-            ],
-          ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

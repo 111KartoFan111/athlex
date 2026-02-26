@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../progress/data/progress_repository.dart';
+import '../data/workout_repository.dart';
+import '../domain/models/workout_model.dart';
+
+final workoutDetailsProvider = FutureProvider.family<WorkoutModel, String>((ref, id) async {
+  return ref.watch(workoutRepositoryProvider).getWorkoutById(id);
+});
 
 class WorkoutSessionScreen extends ConsumerWidget {
   final String workoutId;
@@ -22,7 +29,11 @@ class WorkoutSessionScreen extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: CustomScrollView(
+      body: ref.watch(workoutDetailsProvider(workoutId)).when(
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.neonGreen)),
+        error: (error, stack) => Center(child: Text('Failed: $error', style: const TextStyle(color: AppColors.error))),
+        data: (workout) {
+          return CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Padding(
@@ -32,7 +43,7 @@ class WorkoutSessionScreen extends ConsumerWidget {
                 children: [
                   // Header
                   Text(
-                    'GYM • BEGINNER',
+                    '${workout.sport.name.toUpperCase()} • ${(workout.level ?? "ALL").toUpperCase()}',
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: AppColors.textSecondary,
                       letterSpacing: 1.5,
@@ -41,12 +52,12 @@ class WorkoutSessionScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Upper Body Power',
+                    workout.title,
                     style: theme.textTheme.headlineLarge,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '32 min • 360 kcal • Dumbbells • Bench',
+                    '${workout.durationMin} min • ${workout.calories ?? "--"} kcal • ${workout.equipmentNeeded ?? "No equipment"}',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -71,60 +82,27 @@ class WorkoutSessionScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-                            child: Text(
-                              'Warm-up',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
+                  if (workout.exercises.isEmpty)
+                     const Text('No exercises found', style: TextStyle(color: AppColors.textSecondary))
+                  else
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var i = 0; i < workout.exercises.length; i++)
+                              Column(
+                                children: [
+                                  _buildExerciseRow(theme, i + 1, workout.exercises[i].title, '${workout.exercises[i].reps ?? "-"} reps'),
+                                  if (i < workout.exercises.length - 1)
+                                    const Divider(height: 1, color: AppColors.background),
+                                ],
                               ),
-                            ),
-                          ),
-                          _buildExerciseRow(theme, 1, 'Jumping Jacks', 'Controlled tempo • 2 mins'),
-                          const Divider(height: 1, color: AppColors.background),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-                            child: Text(
-                              'Main Block',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
-                          _buildExerciseRow(theme, 2, 'DB Bench Press', 'Controlled tempo • 10 reps'),
-                          const Divider(height: 1, color: AppColors.background),
-                          _buildExerciseRow(theme, 3, 'Incline Dumbbell Fly', 'Controlled tempo • 12 reps'),
-                          const Divider(height: 1, color: AppColors.background),
-                          _buildExerciseRow(theme, 4, 'Shoulder Press', 'Controlled tempo • 10 reps'),
-                          const Divider(height: 1, color: AppColors.background),
-                          _buildExerciseRow(theme, 5, 'Tricep Extensions', 'Controlled tempo • 15 reps'),
-                          const Divider(height: 1, color: AppColors.background),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-                            child: Text(
-                              'Finisher',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                          ),
-                          _buildExerciseRow(theme, 6, 'Cool Down Stretch', 'Hold positions • 5 mins'),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -133,7 +111,8 @@ class WorkoutSessionScreen extends ConsumerWidget {
           // Bottom padding to clear fixed bar
           const SliverPadding(padding: EdgeInsets.only(bottom: 120)),
         ],
-      ),
+      );
+    }),
       
       // Fixed Bottom Area
       bottomSheet: Container(
@@ -150,9 +129,29 @@ class WorkoutSessionScreen extends ConsumerWidget {
             children: [
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Log completed'),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    return ElevatedButton(
+                      onPressed: () async {
+                        try {
+                          await ref.read(progressRepositoryProvider).logWorkout(
+                            workoutId: int.parse(workoutId), 
+                            durationMin: 30, 
+                            caloriesBurned: 400, 
+                            performanceScore: 8
+                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Workout Logged!')));
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e', style: const TextStyle(color: AppColors.error))));
+                          }
+                        }
+                      },
+                      child: const Text('Log completed'),
+                    );
+                  }
                 ),
               ),
               const SizedBox(height: 8),

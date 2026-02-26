@@ -1,36 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../sports/data/sport_repository.dart';
+import '../../profile/data/user_repository.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentStep = 0;
   String? _selectedLevel;
-  String? _selectedSport;
+  int? _selectedSportId;
+  bool _isLoading = false;
 
   final List<String> _levels = ['Beginner', 'Intermediate', 'Advanced'];
-  final List<Map<String, dynamic>> _sports = [
-    {'name': 'Gym', 'icon': Icons.fitness_center},
-    {'name': 'Football', 'icon': Icons.sports_soccer},
-    {'name': 'Basketball', 'icon': Icons.sports_basketball},
-    {'name': 'Boxing', 'icon': Icons.sports_mma},
-    {'name': 'Athletics', 'icon': Icons.directions_run},
-    {'name': 'Home', 'icon': Icons.home_work_outlined},
-  ];
 
-  void _nextStep() {
+  Future<void> _nextStep() async {
     if (_currentStep == 0 && _selectedLevel != null) {
       setState(() => _currentStep++);
-    } else if (_currentStep == 1 && _selectedSport != null) {
-      context.go('/');
+    } else if (_currentStep == 1 && _selectedSportId != null) {
+      setState(() => _isLoading = true);
+      try {
+        await ref.read(userRepositoryProvider).setupProfile(
+          primarySportId: _selectedSportId!,
+          level: _selectedLevel!,
+          goal: 'General Fitness', // Providing a default for now.
+        );
+        if (mounted) context.go('/');
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save profile: $e')),
+          );
+        }
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -75,11 +86,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: (_currentStep == 0 && _selectedLevel != null) ||
-                             (_currentStep == 1 && _selectedSport != null)
-                      ? _nextStep
-                      : null,
-                  child: Text(_currentStep == 1 ? l10n.onboardingNext : l10n.onboardingNext),
+                  onPressed: _isLoading
+                      ? null
+                      : ((_currentStep == 0 && _selectedLevel != null) ||
+                          (_currentStep == 1 && _selectedSportId != null))
+                          ? _nextStep
+                          : null,
+                  child: _isLoading 
+                      ? const SizedBox(
+                          height: 20, width: 20, 
+                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background))
+                      : Text(_currentStep == 1 ? l10n.onboardingNext : l10n.onboardingNext),
                 ),
               ),
             ),
@@ -159,53 +176,65 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: 32),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 1.1,
-          ),
-          itemCount: _sports.length,
-          itemBuilder: (context, index) {
-            final sport = _sports[index];
-            final name = sport['name'] as String;
-            final isSelected = _selectedSport == name;
+        FutureBuilder(
+          future: ref.read(sportRepositoryProvider).getSports(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator(color: AppColors.neonGreen));
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error loading sports', style: TextStyle(color: AppColors.error)));
+            }
+            
+            final sports = snapshot.data ?? [];
 
-            return InkWell(
-              onTap: () => setState(() => _selectedSport = name),
-              borderRadius: BorderRadius.circular(16),
-              child: Ink(
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 1.1,
+              ),
+              itemCount: sports.length,
+              itemBuilder: (context, index) {
+                final sport = sports[index];
+                final isSelected = _selectedSportId == sport.id;
+
+                return InkWell(
+                  onTap: () => setState(() => _selectedSportId = sport.id),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? AppColors.neonGreen : Colors.transparent,
-                    width: isSelected ? 2 : 0,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      sport['icon'] as IconData,
-                      size: 40,
-                      color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      name,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
+                  child: Ink(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected ? AppColors.neonGreen : Colors.transparent,
+                        width: isSelected ? 2 : 0,
                       ),
                     ),
-                  ],
-                ),
-              ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.fitness_center, // Fallback icon
+                          size: 40,
+                          color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          sport.name,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
-          },
+          }
         ),
       ],
     );

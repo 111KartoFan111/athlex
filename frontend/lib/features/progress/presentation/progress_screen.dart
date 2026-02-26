@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_colors.dart';
+import 'providers/progress_provider.dart';
+import '../../profile/data/user_repository.dart';
 
-class ProgressScreen extends StatelessWidget {
+class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-
-    // Mock history data
-    final history = [
-      {'date': 'Today', 'title': 'Upper Body Power'},
-      {'date': 'Yesterday', 'title': '15 Min Fat Burner'},
-      {'date': 'Oct 24', 'title': 'Core Crusher'},
-      {'date': 'Oct 22', 'title': 'Leg Day Finish'},
-    ];
+    final historyAsync = ref.watch(workoutHistoryProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -109,29 +106,42 @@ class ProgressScreen extends StatelessWidget {
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 16),
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: history.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final item = history[index];
-                  return Card(
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      title: Text(
-                        item['title']!,
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      subtitle: Text(
-                        item['date']!,
-                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                      ),
-                      trailing: const Icon(
-                        Icons.check_circle,
-                        color: AppColors.neonGreen,
-                      ),
-                    ),
+              historyAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.neonGreen)),
+                error: (err, stack) => Center(child: Text('Failed to load history', style: TextStyle(color: AppColors.error))),
+                data: (historyLogs) {
+                  if (historyLogs.isEmpty) {
+                     return const Center(child: Text('No workouts logged yet.'));
+                  }
+                  return ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: historyLogs.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final item = historyLogs[index];
+                      final workout = item['workout'];
+                      final rawDate = item['date'];
+                      final dateStr = rawDate != null ? DateFormat('MMM dd, yyyy').format(DateTime.parse(rawDate)) : 'Unknown Date';
+                      
+                      return Card(
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          title: Text(
+                            workout?['title'] ?? 'Unknown Workout',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          subtitle: Text(
+                            dateStr,
+                            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                          ),
+                          trailing: const Icon(
+                            Icons.check_circle,
+                            color: AppColors.neonGreen,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               ),

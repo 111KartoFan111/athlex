@@ -40,6 +40,9 @@ public class User {
     @Column(name = "rank_title")
     private String rankTitle;
 
+    @Column(name = "blocked")
+    private Boolean blocked = false;
+
     public User() {
     }
 
@@ -113,6 +116,14 @@ public class User {
 
     public void setRankTitle(String rankTitle) {
         this.rankTitle = rankTitle;
+    }
+
+    public Boolean getBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
     }
 
     @Override
