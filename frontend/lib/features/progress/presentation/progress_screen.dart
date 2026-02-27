@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../core/theme/app_colors.dart';
 import 'providers/progress_provider.dart';
-import '../../profile/data/user_repository.dart';
 
 class ProgressScreen extends ConsumerWidget {
   const ProgressScreen({super.key});
@@ -15,22 +14,33 @@ class ProgressScreen extends ConsumerWidget {
     final historyAsync = ref.watch(workoutHistoryProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Your Progress'),
-      ),
+      appBar: AppBar(title: const Text('Your Progress')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: historyAsync.when(
-            loading: () => const Center(child: CircularProgressIndicator(color: AppColors.neonGreen)),
-            error: (err, stack) => Center(child: Text('Failed to load progress', style: TextStyle(color: AppColors.error))),
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: AppColors.neonGreen),
+            ),
+            error: (err, stack) => Center(
+              child: Text(
+                'Failed to load progress',
+                style: TextStyle(color: AppColors.error),
+              ),
+            ),
             data: (historyLogs) {
               // Compute real aggregate stats from history
               final totalWorkouts = historyLogs.length;
               final totalMinutes = historyLogs.fold<int>(
-                0, (sum, item) => sum + ((item['durationMin'] as num?)?.toInt() ?? 0));
+                0,
+                (sum, item) =>
+                    sum + ((item['durationMin'] as num?)?.toInt() ?? 0),
+              );
               final totalKcal = historyLogs.fold<int>(
-                0, (sum, item) => sum + ((item['caloriesBurned'] as num?)?.toInt() ?? 0));
+                0,
+                (sum, item) =>
+                    sum + ((item['caloriesBurned'] as num?)?.toInt() ?? 0),
+              );
               final hoursStr = totalMinutes >= 60
                   ? '${(totalMinutes ~/ 60)}h ${totalMinutes % 60}m'
                   : '${totalMinutes}m';
@@ -44,7 +54,11 @@ class ProgressScreen extends ConsumerWidget {
                   // Summary Row
                   Row(
                     children: [
-                      _buildSummaryBlock(theme, '$totalWorkouts', 'Total Workouts'),
+                      _buildSummaryBlock(
+                        theme,
+                        '$totalWorkouts',
+                        'Total Workouts',
+                      ),
                       const SizedBox(width: 16),
                       _buildSummaryBlock(theme, hoursStr, 'Active Time'),
                       const SizedBox(width: 16),
@@ -74,22 +88,50 @@ class ProgressScreen extends ConsumerWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (double value, TitleMeta meta) {
-                                const style = TextStyle(color: AppColors.textSecondary, fontSize: 12);
-                                final days = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-                                final text = value.toInt() < days.length ? days[value.toInt()] : '';
-                                return SideTitleWidget(meta: meta, space: 8, child: Text(text, style: style));
+                                const style = TextStyle(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 12,
+                                );
+                                final days = [
+                                  'M',
+                                  'T',
+                                  'W',
+                                  'T',
+                                  'F',
+                                  'S',
+                                  'S',
+                                ];
+                                final text = value.toInt() < days.length
+                                    ? days[value.toInt()]
+                                    : '';
+                                return SideTitleWidget(
+                                  meta: meta,
+                                  space: 8,
+                                  child: Text(text, style: style),
+                                );
                               },
                             ),
                           ),
-                          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          leftTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
                         ),
                         gridData: const FlGridData(show: false),
                         borderData: FlBorderData(show: false),
                         barGroups: [
-                          _makeBarData(0, 40), _makeBarData(1, 80), _makeBarData(2, 30),
-                          _makeBarData(3, 90), _makeBarData(4, 50), _makeBarData(5, 100), _makeBarData(6, 60),
+                          _makeBarData(0, 40),
+                          _makeBarData(1, 80),
+                          _makeBarData(2, 30),
+                          _makeBarData(3, 90),
+                          _makeBarData(4, 50),
+                          _makeBarData(5, 100),
+                          _makeBarData(6, 60),
                         ],
                       ),
                     ),
@@ -106,20 +148,37 @@ class ProgressScreen extends ConsumerWidget {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: historyLogs.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final item = historyLogs[index];
                         final workout = item['workout'];
                         final rawDate = item['date'];
                         final dateStr = rawDate != null
-                            ? DateFormat('MMM dd, yyyy').format(DateTime.parse(rawDate))
+                            ? DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(DateTime.parse(rawDate))
                             : 'Unknown Date';
                         return Card(
                           child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            title: Text(workout?['title'] ?? 'Unknown Workout', style: theme.textTheme.titleMedium),
-                            subtitle: Text(dateStr, style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary)),
-                            trailing: const Icon(Icons.check_circle, color: AppColors.neonGreen),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            title: Text(
+                              workout?['title'] ?? 'Unknown Workout',
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            subtitle: Text(
+                              dateStr,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            trailing: const Icon(
+                              Icons.check_circle,
+                              color: AppColors.neonGreen,
+                            ),
                           ),
                         );
                       },

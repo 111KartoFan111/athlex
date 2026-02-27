@@ -2,6 +2,7 @@ package com.athlex.backend.entity;
 
 import com.athlex.backend.entity.enums.Level;
 import com.athlex.backend.entity.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -17,6 +18,7 @@ public class User {
     private String email;
 
     @Column(name = "password_hash", nullable = false)
+    @JsonIgnore
     private String passwordHash;
 
     @Enumerated(EnumType.STRING)

@@ -1,6 +1,7 @@
 package com.athlex.backend.entity;
 
 import com.athlex.backend.entity.enums.Level;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ public class Workout {
     private Boolean isAiGenerated = false;
 
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Exercise> exercises = new ArrayList<>();
 
     public Workout() {

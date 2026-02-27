@@ -33,8 +33,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     ref.listen(authStateProvider, (previous, next) {
       if (next is AsyncData && next.value != null) {
-        // Successful registration, navigate to onboarding
-        context.go('/onboarding');
+        final user = next.value!;
+        if (user.role == 'ADMIN') {
+          context.go('/admin');
+          return;
+        }
+        context.go(user.primarySport == null ? '/onboarding' : '/');
       } else if (next is AsyncError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Registration failed: ${next.error}')),
@@ -90,7 +94,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: l10n.loginEmailHint,
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -100,7 +107,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: l10n.loginPasswordHint,
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -110,7 +120,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 48),
@@ -123,28 +136,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         final email = _emailController.text;
                         final password = _passwordController.text;
                         final confirmPassword = _confirmPasswordController.text;
-                        
-                        if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+
+                        if (email.isEmpty ||
+                            password.isEmpty ||
+                            confirmPassword.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please fill all fields.')),
+                            const SnackBar(
+                              content: Text('Please fill all fields.'),
+                            ),
                           );
                           return;
                         }
-                        
+
                         if (password != confirmPassword) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Passwords do not match.')),
+                            const SnackBar(
+                              content: Text('Passwords do not match.'),
+                            ),
                           );
                           return;
                         }
-                        
-                        ref.read(authStateProvider.notifier).register(email, password);
+
+                        ref
+                            .read(authStateProvider.notifier)
+                            .register(email, password);
                       },
-                child: authState.isLoading 
+                child: authState.isLoading
                     ? const SizedBox(
-                        height: 20, 
-                        width: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background)
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.background,
+                        ),
                       )
                     : const Text('Sign Up'),
               ),
@@ -156,11 +180,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 children: [
                   Text(
                     "Already have an account?",
-                    style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   TextButton(
                     onPressed: () => context.pop(),
-                    style: TextButton.styleFrom(foregroundColor: AppColors.neonGreen),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.neonGreen,
+                    ),
                     child: const Text('Log In'),
                   ),
                 ],

@@ -8,6 +8,8 @@ import com.athlex.backend.repository.WorkoutRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class ExerciseService {
 
@@ -17,6 +19,11 @@ public class ExerciseService {
     public ExerciseService(ExerciseRepository exerciseRepository, WorkoutRepository workoutRepository) {
         this.exerciseRepository = exerciseRepository;
         this.workoutRepository = workoutRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Exercise> getAllExercises() {
+        return exerciseRepository.findAll();
     }
 
     @Transactional

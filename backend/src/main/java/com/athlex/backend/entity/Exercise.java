@@ -1,5 +1,6 @@
 package com.athlex.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ public class Exercise {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "workout_id", nullable = false)
+    @JsonBackReference
     private Workout workout;
 
     @Column(nullable = false)

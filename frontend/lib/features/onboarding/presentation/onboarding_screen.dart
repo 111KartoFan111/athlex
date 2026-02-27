@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import '../../sports/data/sport_repository.dart';
 import '../../profile/data/user_repository.dart';
 
@@ -19,25 +20,26 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int? _selectedSportId;
   bool _isLoading = false;
 
-  final List<String> _levels = ['Beginner', 'Intermediate', 'Advanced'];
-
   Future<void> _nextStep() async {
     if (_currentStep == 0 && _selectedLevel != null) {
       setState(() => _currentStep++);
     } else if (_currentStep == 1 && _selectedSportId != null) {
       setState(() => _isLoading = true);
       try {
-        await ref.read(userRepositoryProvider).setupProfile(
-          primarySportId: _selectedSportId!,
-          level: _selectedLevel!,
-          goal: 'General Fitness', // Providing a default for now.
-        );
+        await ref
+            .read(userRepositoryProvider)
+            .setupProfile(
+              primarySportId: _selectedSportId!,
+              level: _selectedLevel!,
+              goal: 'General Fitness', // Providing a default for now.
+            );
+        await ref.read(authStateProvider.notifier).refreshCurrentUser();
         if (mounted) context.go('/');
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save profile: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Failed to save profile: $e')));
         }
       } finally {
         if (mounted) setState(() => _isLoading = false);
@@ -49,13 +51,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
-    
-    // Refresh names from l10n
-    final localizedLevels = [
-      l10n.onboardingLevelBeginner,
-      l10n.onboardingLevelIntermediate,
-      l10n.onboardingLevelAdvanced
-    ];
+
+    final localizedLevels = <String, String>{
+      'BEGINNER': l10n.onboardingLevelBeginner,
+      'INTERMEDIATE': l10n.onboardingLevelIntermediate,
+      'ADVANCED': l10n.onboardingLevelAdvanced,
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -73,7 +74,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
-                child: _currentStep == 0 ? _buildLevelStep(theme, l10n, localizedLevels) : _buildSportStep(theme, l10n),
+                child: _currentStep == 0
+                    ? _buildLevelStep(theme, l10n, localizedLevels)
+                    : _buildSportStep(theme, l10n),
               ),
             ),
             // Bottom Action
@@ -81,7 +84,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               padding: const EdgeInsets.all(24.0),
               decoration: const BoxDecoration(
                 color: AppColors.background,
-                border: Border(top: BorderSide(color: AppColors.surface, width: 1)),
+                border: Border(
+                  top: BorderSide(color: AppColors.surface, width: 1),
+                ),
               ),
               child: SizedBox(
                 width: double.infinity,
@@ -89,14 +94,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   onPressed: _isLoading
                       ? null
                       : ((_currentStep == 0 && _selectedLevel != null) ||
-                          (_currentStep == 1 && _selectedSportId != null))
-                          ? _nextStep
-                          : null,
-                  child: _isLoading 
+                            (_currentStep == 1 && _selectedSportId != null))
+                      ? _nextStep
+                      : null,
+                  child: _isLoading
                       ? const SizedBox(
-                          height: 20, width: 20, 
-                          child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background))
-                      : Text(_currentStep == 1 ? l10n.onboardingNext : l10n.onboardingNext),
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.background,
+                          ),
+                        )
+                      : Text(
+                          _currentStep == 1
+                              ? l10n.onboardingNext
+                              : l10n.onboardingNext,
+                        ),
                 ),
               ),
             ),
@@ -106,33 +120,40 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildLevelStep(ThemeData theme, AppLocalizations l10n, List<String> localizedLevels) {
+  Widget _buildLevelStep(
+    ThemeData theme,
+    AppLocalizations l10n,
+    Map<String, String> localizedLevels,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.onboardingLevelTitle,
-          style: theme.textTheme.headlineLarge,
-        ),
+        Text(l10n.onboardingLevelTitle, style: theme.textTheme.headlineLarge),
         const SizedBox(height: 8),
         Text(
           'Help us tailor your workouts to your experience.',
-          style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: 32),
-        ...localizedLevels.map((level) {
-          final isSelected = _selectedLevel == level;
+        ...localizedLevels.entries.map((entry) {
+          final levelValue = entry.key;
+          final levelLabel = entry.value;
+          final isSelected = _selectedLevel == levelValue;
           return Padding(
             padding: const EdgeInsets.only(bottom: 16.0),
             child: InkWell(
-              onTap: () => setState(() => _selectedLevel = level),
+              onTap: () => setState(() => _selectedLevel = levelValue),
               borderRadius: BorderRadius.circular(16),
               child: Ink(
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: isSelected ? AppColors.neonGreen : Colors.transparent,
+                    color: isSelected
+                        ? AppColors.neonGreen
+                        : Colors.transparent,
                     width: isSelected ? 2 : 0,
                   ),
                 ),
@@ -142,13 +163,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     children: [
                       Icon(
                         isSelected ? Icons.check_circle : Icons.circle_outlined,
-                        color: isSelected ? AppColors.neonGreen : AppColors.textSecondary,
+                        color: isSelected
+                            ? AppColors.neonGreen
+                            : AppColors.textSecondary,
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        level,
+                        levelLabel,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
+                          color: isSelected
+                              ? AppColors.neonGreen
+                              : AppColors.textPrimary,
                         ),
                       ),
                     ],
@@ -157,7 +182,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
@@ -166,25 +191,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.onboardingSportTitle,
-          style: theme.textTheme.headlineLarge,
-        ),
+        Text(l10n.onboardingSportTitle, style: theme.textTheme.headlineLarge),
         const SizedBox(height: 8),
         Text(
           'What are you training for mostly?',
-          style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
         const SizedBox(height: 32),
         FutureBuilder(
           future: ref.read(sportRepositoryProvider).getSports(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.neonGreen));
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.neonGreen),
+              );
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error loading sports', style: TextStyle(color: AppColors.error)));
+              return Center(
+                child: Text(
+                  'Error loading sports',
+                  style: TextStyle(color: AppColors.error),
+                ),
+              );
             }
-            
+
             final sports = snapshot.data ?? [];
 
             return GridView.builder(
@@ -209,7 +240,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       color: AppColors.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isSelected ? AppColors.neonGreen : Colors.transparent,
+                        color: isSelected
+                            ? AppColors.neonGreen
+                            : Colors.transparent,
                         width: isSelected ? 2 : 0,
                       ),
                     ),
@@ -219,13 +252,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         Icon(
                           Icons.fitness_center, // Fallback icon
                           size: 40,
-                          color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
+                          color: isSelected
+                              ? AppColors.neonGreen
+                              : AppColors.textPrimary,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           sport.name,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            color: isSelected ? AppColors.neonGreen : AppColors.textPrimary,
+                            color: isSelected
+                                ? AppColors.neonGreen
+                                : AppColors.textPrimary,
                           ),
                         ),
                       ],
@@ -234,7 +271,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 );
               },
             );
-          }
+          },
         ),
       ],
     );

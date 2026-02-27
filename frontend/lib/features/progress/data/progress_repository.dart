@@ -19,13 +19,15 @@ class ProgressRepository {
     required int performanceScore,
   }) async {
     try {
-      await _dio.post('/progress/log', data: {
-        'workoutId': workoutId,
-        'durationMin': durationMin,
-        'caloriesBurned': caloriesBurned,
-        'performanceScore': performanceScore,
-      });
-    } catch (e) {
+      await _dio.post(
+        '/progress/log',
+        data: {
+          'workoutId': workoutId,
+          'durationMin': durationMin,
+          'caloriesBurned': caloriesBurned,
+          'performanceScore': performanceScore,
+        },
+      );
     } catch (e) {
       throw Exception('Failed to log workout: $e');
     }

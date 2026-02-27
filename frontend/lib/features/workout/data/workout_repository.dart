@@ -1,4 +1,4 @@
-цimport 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
 import '../domain/models/workout_model.dart';
@@ -26,7 +26,10 @@ class WorkoutRepository {
   Future<List<WorkoutModel>> getWorkouts({String? level}) async {
     try {
       final queryParams = level != null ? {'level': level.toUpperCase()} : null;
-      final response = await _dio.get('/workouts', queryParameters: queryParams);
+      final response = await _dio.get(
+        '/workouts',
+        queryParameters: queryParams,
+      );
       final List<dynamic> data = response.data;
       return data.map((json) => WorkoutModel.fromJson(json)).toList();
     } catch (e) {
@@ -36,7 +39,10 @@ class WorkoutRepository {
 
   Future<List<WorkoutModel>> getWorkoutsBySport(int sportId) async {
     try {
-      final response = await _dio.get('/workouts', queryParameters: {'sportId': sportId});
+      final response = await _dio.get(
+        '/workouts',
+        queryParameters: {'sportId': sportId},
+      );
       final List<dynamic> data = response.data;
       return data.map((json) => WorkoutModel.fromJson(json)).toList();
     } catch (e) {

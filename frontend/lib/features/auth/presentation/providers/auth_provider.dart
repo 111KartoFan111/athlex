@@ -2,10 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/models/user_model.dart';
 import '../../data/auth_repository.dart';
 
-final authStateProvider = StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  return AuthNotifier(authRepository);
-});
+final authStateProvider =
+    StateNotifierProvider<AuthNotifier, AsyncValue<UserModel?>>((ref) {
+      final authRepository = ref.watch(authRepositoryProvider);
+      return AuthNotifier(authRepository);
+    });
 
 class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   final AuthRepository _repository;
@@ -38,5 +39,14 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
   Future<void> logout() async {
     await _repository.logout();
     state = const AsyncValue.data(null);
+  }
+
+  Future<void> refreshCurrentUser() async {
+    try {
+      final user = await _repository.getCurrentUser();
+      state = AsyncValue.data(user);
+    } catch (_) {
+      // Keep current state if refresh fails.
+    }
   }
 }

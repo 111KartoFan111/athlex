@@ -4,6 +4,7 @@ import 'views/admin_dashboard_view.dart';
 import 'views/admin_data_tables_view.dart';
 import 'views/admin_workouts_table_view.dart';
 import 'views/admin_exercises_table_view.dart';
+import 'views/admin_challenges_table_view.dart';
 
 class AdminMainScreen extends StatefulWidget {
   const AdminMainScreen({super.key});
@@ -20,8 +21,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
     const AdminDataTablesView(title: 'Users'),
     const AdminWorkoutsTableView(title: 'Workouts'),
     const AdminExercisesTableView(title: 'Exercises'),
-    const Center(child: Text('Challenges (Placeholder)')),
-    const Center(child: Text('Settings (Placeholder)')),
+    const AdminChallengesTableView(title: 'Challenges'),
   ];
 
   @override
@@ -55,12 +55,11 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
                 _buildSidebarItem(3, Icons.sports_gymnastics, 'Exercises'),
                 _buildSidebarItem(4, Icons.emoji_events, 'Challenges'),
                 const Spacer(),
-                _buildSidebarItem(5, Icons.settings, 'Settings'),
                 const SizedBox(height: 24),
               ],
             ),
           ),
-          
+
           // Main Content
           Expanded(
             child: Container(
@@ -75,7 +74,7 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
 
   Widget _buildSidebarItem(int index, IconData icon, String title) {
     final isSelected = _selectedIndex == index;
-    
+
     return InkWell(
       onTap: () {
         setState(() {
@@ -84,7 +83,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.neonGreen.withValues(alpha: 255 * 0.1) : Colors.transparent,
+          color: isSelected
+              ? AppColors.neonGreen.withValues(alpha: 255 * 0.1)
+              : Colors.transparent,
           border: Border(
             left: BorderSide(
               color: isSelected ? AppColors.neonGreen : Colors.transparent,
@@ -104,7 +105,9 @@ class _AdminMainScreenState extends State<AdminMainScreen> {
             Text(
               title,
               style: TextStyle(
-                color: isSelected ? AppColors.neonGreen : AppColors.textSecondary,
+                color: isSelected
+                    ? AppColors.neonGreen
+                    : AppColors.textSecondary,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

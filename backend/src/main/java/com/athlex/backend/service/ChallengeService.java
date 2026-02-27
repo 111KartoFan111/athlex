@@ -6,6 +6,9 @@ import com.athlex.backend.repository.ChallengeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class ChallengeService {
 
@@ -13,6 +16,16 @@ public class ChallengeService {
 
     public ChallengeService(ChallengeRepository challengeRepository) {
         this.challengeRepository = challengeRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Challenge> getAllChallenges() {
+        return challengeRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Challenge> getDailyChallenge() {
+        return challengeRepository.findAll().stream().findFirst();
     }
 
     @Transactional

@@ -31,12 +31,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     ref.listen(authStateProvider, (previous, next) {
       if (next is AsyncData && next.value != null) {
-        // Successful login, navigate to onboarding
-        context.go('/onboarding');
+        final user = next.value!;
+        if (user.role == 'ADMIN') {
+          context.go('/admin');
+          return;
+        }
+        context.go(user.primarySport == null ? '/onboarding' : '/');
       } else if (next is AsyncError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login failed: ${next.error}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Login failed: ${next.error}')));
       }
     });
 
@@ -49,11 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               // Logo Placeholder
               const SizedBox(height: 48),
-              Icon(
-                Icons.fitness_center,
-                size: 80,
-                color: AppColors.neonGreen,
-              ),
+              Icon(Icons.fitness_center, size: 80, color: AppColors.neonGreen),
               const SizedBox(height: 16),
               Text(
                 l10n.appTitle,
@@ -72,7 +72,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: l10n.loginEmailHint,
-                  prefixIcon: const Icon(Icons.email_outlined, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -82,7 +85,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   labelText: l10n.loginPasswordHint,
-                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.textSecondary),
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -111,14 +117,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         final email = _emailController.text;
                         final password = _passwordController.text;
                         if (email.isNotEmpty && password.isNotEmpty) {
-                          ref.read(authStateProvider.notifier).login(email, password);
+                          ref
+                              .read(authStateProvider.notifier)
+                              .login(email, password);
                         }
                       },
-                child: authState.isLoading 
+                child: authState.isLoading
                     ? const SizedBox(
-                        height: 20, 
-                        width: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.background)
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.background,
+                        ),
                       )
                     : Text(l10n.loginButton),
               ),
@@ -130,11 +141,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 children: [
                   Text(
                     "Don't have an account?",
-                    style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                   TextButton(
-                    onPressed: authState.isLoading ? null : () => context.push('/register'),
-                    style: TextButton.styleFrom(foregroundColor: AppColors.neonGreen),
+                    onPressed: authState.isLoading
+                        ? null
+                        : () => context.push('/register'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.neonGreen,
+                    ),
                     child: const Text('Sign up'),
                   ),
                 ],

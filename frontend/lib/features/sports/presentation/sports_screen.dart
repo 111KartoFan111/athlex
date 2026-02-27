@@ -5,7 +5,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/tag_widget.dart';
 import '../data/sport_repository.dart';
 import '../domain/models/sport_model.dart';
-import '../../profile/data/user_repository.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 
 final sportsCatalogProvider = FutureProvider<List<SportModel>>((ref) async {
@@ -29,7 +28,7 @@ class SportsScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Text(
+                  Text(
                     'Sports',
                     style: theme.textTheme.headlineLarge?.copyWith(
                       fontWeight: FontWeight.bold,
@@ -47,79 +46,106 @@ class SportsScreen extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: ref.watch(sportsCatalogProvider).when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(color: AppColors.neonGreen),
-                ),
-                error: (error, stack) => Center(
-                  child: Text('Failed to load sports: $error', style: const TextStyle(color: AppColors.error)),
-                ),
-                data: (sports) {
-                  final user = ref.watch(authStateProvider).value;
-                  final primarySportId = user?.primarySport?.id;
+              child: ref
+                  .watch(sportsCatalogProvider)
+                  .when(
+                    loading: () => const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.neonGreen,
+                      ),
+                    ),
+                    error: (error, stack) => Center(
+                      child: Text(
+                        'Failed to load sports: $error',
+                        style: const TextStyle(color: AppColors.error),
+                      ),
+                    ),
+                    data: (sports) {
+                      final user = ref.watch(authStateProvider).value;
+                      final primarySportId = user?.primarySport?.id;
 
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-                    itemCount: sports.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final sport = sports[index];
-                      final isPrimary = sport.id == primarySportId;
-
-                      return Card(
-                        child: InkWell(
-                          onTap: () => context.push('/workouts/sport/${sport.id}?name=${Uri.encodeComponent(sport.name)}'),
-                          borderRadius: BorderRadius.circular(16),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.background,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isPrimary ? AppColors.neonGreen.withValues(alpha: 255 * 0.5) : AppColors.textSecondary.withValues(alpha: 255 * 0.3),
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.fitness_center, // Fallback icon
-                                    size: 28,
-                                    color: isPrimary ? AppColors.neonGreen : AppColors.textPrimary,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        sport.name,
-                                        style: theme.textTheme.titleMedium,
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Tap to explore workouts',
-                                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                TagWidget(
-                                  text: isPrimary ? 'Primary' : 'Sport',
-                                  isPrimary: isPrimary,
-                                ),
-                              ],
-                            ),
-                          ),
+                      return ListView.separated(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0,
+                          vertical: 8.0,
                         ),
+                        itemCount: sports.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final sport = sports[index];
+                          final isPrimary = sport.id == primarySportId;
+
+                          return Card(
+                            child: InkWell(
+                              onTap: () => context.push(
+                                '/workouts/sport/${sport.id}?name=${Uri.encodeComponent(sport.name)}',
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16.0),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.background,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: isPrimary
+                                              ? AppColors.neonGreen.withValues(
+                                                  alpha: 255 * 0.5,
+                                                )
+                                              : AppColors.textSecondary
+                                                    .withValues(
+                                                      alpha: 255 * 0.3,
+                                                    ),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        Icons.fitness_center, // Fallback icon
+                                        size: 28,
+                                        color: isPrimary
+                                            ? AppColors.neonGreen
+                                            : AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            sport.name,
+                                            style: theme.textTheme.titleMedium,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Tap to explore workouts',
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    TagWidget(
+                                      text: isPrimary ? 'Primary' : 'Sport',
+                                      isPrimary: isPrimary,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
             ),
           ],
         ),

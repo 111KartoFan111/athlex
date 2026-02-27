@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin/challenges")
 @PreAuthorize("hasRole('ADMIN')")
@@ -18,6 +20,11 @@ public class AdminChallengeController {
 
     public AdminChallengeController(ChallengeService challengeService) {
         this.challengeService = challengeService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Challenge>> getAllChallenges() {
+        return ResponseEntity.ok(challengeService.getAllChallenges());
     }
 
     @PostMapping
